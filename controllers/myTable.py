@@ -115,12 +115,12 @@ def get_all_colors_names():
 
 # 3. Get a color palette by name
 @color_palette_blueprint.route('/color-palette/<color_name>', methods=['GET'])
-def get_color_palette_details(palette_name):
+def get_color_palette_details(color_name):
     """
     Get details of a specific color palette by name
     ---
     parameters:
-        - name: palette_name
+        - name: color_name
           in: path
           type: string
           required: true
@@ -138,15 +138,15 @@ def get_color_palette_details(palette_name):
     package_collection = db["colorsPalette"]  # מסד נתונים קבוע מראש
 
     # חיפוש הרשומה לפי name (Case-Sensitive)
-    colors = package_collection.find_one({"name": palette_name})
+    palette = package_collection.find_one({"name" : color_name})
 
-    if not colors:
+    if not palette:
         return jsonify({'error': 'Color palette not found'}), 404
 
     # המרת ObjectId למחרוזת כדי למנוע בעיית JSON
-    colors["_id"] = str(colors["_id"])
+    palette["_id"] = str(palette["_id"])
 
-    return jsonify(colors), 200
+    return jsonify(palette), 200
 
 
 
