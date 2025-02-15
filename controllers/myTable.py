@@ -3,21 +3,21 @@ from mongodb_connection_manager import MongoConnectionHolder
 from datetime import datetime
 import uuid
 
-feature_toggle_blueprint = Blueprint('cluster0', __name__)
+color_palette_blueprint = Blueprint('cluster0', __name__)
 
-# 1. Create a new feature toggle
-@feature_toggle_blueprint.route('/feature-toggle', methods=['POST'])
-def create_feature_toggle():
+# 1. Create a new color palette
+@color_palette_blueprint.route('/color-palette', methods=['POST'])
+def create_color_palette():
     """
-    Create a new feature toggle
+    Create a new color palette
     ---
     parameters:
-        - name: feature_toggle
+        - name: color_palette
           in: body
           required: true
-          description: The feature toggle to create
+          description: The color palette to create
           schema:
-            id: feature_toggle
+            id: color_palette
             required:
                 - name
                 - c1
@@ -26,10 +26,10 @@ def create_feature_toggle():
             properties:
                 name:
                     type: string
-                    description: The name of the feature
+                    description: The name of the palette
                 description:
                     type: string
-                    description: The description of the feature toggle
+                    description: The description of the color palette
                 c1:
                     type: string
                     description: color number 1
@@ -50,11 +50,11 @@ def create_feature_toggle():
                     description: color number 6
     responses:
         201:
-            description: The feature toggle was created successfully
+            description: The color palette was created successfully
         400:
             description: The request was invalid
         500:
-            description: An error occurred while creating the feature toggle
+            description: An error occurred while creating the color palette
     """
     data = request.json
     db = MongoConnectionHolder.get_db()
@@ -67,8 +67,8 @@ def create_feature_toggle():
     if not all(key in data for key in ['name', 'description', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6']):
         return jsonify({"error": "Invalid request"}), 400
 
-    # Create the feature toggle item
-    feature_toggle_item = {
+    # Create the color palette item
+    color_palette_item = {
         "_id": str(uuid.uuid4()),
         "name": data['name'],
         "description": data['description'],
@@ -81,22 +81,22 @@ def create_feature_toggle():
     }
 
     
-    # Insert the feature toggle into the database
+    # Insert the color palette into the database
     package_collection = db["colorsPalette"]
-    package_collection.insert_one(feature_toggle_item)
+    package_collection.insert_one(color_palette_item)
 
-    return jsonify({"message": "Feature toggle created successfully", '_id': feature_toggle_item['_id']}), 201
+    return jsonify({"message": "Color palette created successfully", '_id': color_palette_item['_id']}), 201
 
 
-# 2. Get all feature toggles for package name
-@feature_toggle_blueprint.route('/feature-toggles', methods=['GET'])
-def get_all_feature_names():
+# 2. Get all colors palette's name
+@color_palette_blueprint.route('/color-palette', methods=['GET'])
+def get_all_colors_names():
     """
-    Get all feature toggle names
+    Get all colors palette names
     ---
     responses:
         200:
-            description: List of all feature toggle names    
+            description: List of all color palette names    
     """
     db = MongoConnectionHolder.get_db()
     if db is None:
@@ -105,31 +105,31 @@ def get_all_feature_names():
     package_collection = db["colorsPalette"]
 
     # שליפת רק את השדה 'name' מכל האובייקטים
-    feature_names = list(package_collection.find({}, {"name": 1, "_id": 0}))
+    colors_names = list(package_collection.find({}, {"name": 1, "_id": 0}))
 
-    if not feature_names:
-        return jsonify({'error': 'No feature names found'}), 404
+    if not colors_names:
+        return jsonify({'error': 'No color palette names found'}), 404
 
-    return jsonify(feature_names), 200
+    return jsonify(colors_names), 200
 
 
-# 3. Get a feature toggle by id for package name
-@feature_toggle_blueprint.route('/feature-toggle/<feature_name>', methods=['GET'])
-def get_feature_toggle_details(feature_name):
+# 3. Get a color palette by name
+@color_palette_blueprint.route('/color-palette/<color_name>', methods=['GET'])
+def get_color_palette_details(palette_name):
     """
-    Get details of a specific feature toggle by name
+    Get details of a specific color palette by name
     ---
     parameters:
-        - name: feature_name
+        - name: palette_name
           in: path
           type: string
           required: true
-          description: Name of the feature toggle to get
+          description: Name of the color palette to get
     responses:
         200:
-            description: Feature toggle details
+            description: Color palette details
         404:
-            description: Feature toggle not found
+            description: Color palette not found
     """
     db = MongoConnectionHolder.get_db()
     if db is None:
@@ -138,15 +138,15 @@ def get_feature_toggle_details(feature_name):
     package_collection = db["colorsPalette"]  # מסד נתונים קבוע מראש
 
     # חיפוש הרשומה לפי name (Case-Sensitive)
-    feature = package_collection.find_one({"name": feature_name})
+    colors = package_collection.find_one({"name": palette_name})
 
-    if not feature:
-        return jsonify({'error': 'Feature toggle not found'}), 404
+    if not colors:
+        return jsonify({'error': 'Color palette not found'}), 404
 
     # המרת ObjectId למחרוזת כדי למנוע בעיית JSON
-    feature["_id"] = str(feature["_id"])
+    colors["_id"] = str(colors["_id"])
 
-    return jsonify(feature), 200
+    return jsonify(colors), 200
 
 
 

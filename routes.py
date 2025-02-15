@@ -1,4 +1,4 @@
-from controllers.myTable import feature_toggle_blueprint
+from controllers.myTable import color_palette_blueprint
 
 def initial_routes(app):
-    app.register_blueprint(feature_toggle_blueprint)
+    app.register_blueprint(color_palette_blueprint)
