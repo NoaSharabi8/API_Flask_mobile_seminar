@@ -88,7 +88,7 @@ def create_color_palette():
 @color_palette_blueprint.route('/color-palette/<package_name>', methods=['GET'])
 def get_palette_names(package_name):
     """
-    Get all colors palette names
+    Get all colors palette names and description
     ---
     parameters:
         - name: package_name
@@ -98,7 +98,7 @@ def get_palette_names(package_name):
           description: Name of the package
     responses:
         200:
-            description: List of all color palette names    
+            description: List of all color palette names and description  
     """
     db = MongoConnectionHolder.get_db()
     if db is None:
@@ -107,12 +107,13 @@ def get_palette_names(package_name):
     package_collection = db[package_name]
 
     # שליפת רק את השדה 'name' מכל האובייקטים
-    colors_names = list(package_collection.find({}, {"name": 1, "_id": 0}))
+    colors_info = list(package_collection.find({}, {"name": 1, "description": 1, "_id": 0}))
 
-    if not colors_names:
+
+    if not colors_info:
         return jsonify({'error': 'No color palette names found'}), 404
 
-    return jsonify(colors_names), 200
+    return jsonify(colors_info), 200
 
 
 # 3. Get a color palette by name
